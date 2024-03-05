@@ -12,4 +12,4 @@ class Engine:
         return self.chessboardSvg
     
     def get_board(self):
-        return self.chessboardSvg
+        return self.board

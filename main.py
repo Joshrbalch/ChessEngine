@@ -33,7 +33,20 @@ class MainWindow(QWidget):
 
 if __name__ == "__main__":
     engine = Engine()
-    app = QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec()
+    # app = QApplication([])
+    # window = MainWindow()
+    # window.show()
+    # app.exec()
+
+    while(1):
+        board = engine.get_board()
+        move = input("Enter a move: ")
+        if not board.is_legal(chess.Move.from_uci(move)):
+            print("Invalid move")
+            continue
+
+        engine.move(move)
+        print(engine.get_board())
+        print("\n")
+    # engine.move(move)
+    # window.setBoard(engine.get_board())
