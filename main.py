@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     while not board.is_game_over():
         move = input("Enter a move: ")
-        
+
         if move == "exit":
             break
     
