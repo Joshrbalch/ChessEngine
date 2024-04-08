@@ -29,11 +29,13 @@ if __name__ == "__main__":
     board = chess.Board()
     engine = Engine(board)
 
+    print("Enter 'exit' to quit")
+
     while not board.is_game_over():
         move = input("Enter a move: ")
 
         if move == "exit":
-            break
+            exit()
     
         if not board.is_legal(chess.Move.from_uci(move)):
             print("Invalid move")
@@ -44,5 +46,7 @@ if __name__ == "__main__":
 
         board = engine.randomMove(board)
         window.setBoard(board)
+
+        print(engine.score_board())
 
     app.exec()
