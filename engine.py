@@ -28,11 +28,13 @@ class CandidateMove:
         self.score = score
 
 class BoardTree:
+    root = None
+
     def __init__(self, board):
         self.board = board
         self.children = []
 
-        root = CandidateMove(None, 0)
+        root = CandidateMove(board, 0)
     
     def get_board(self):
         return self.board
