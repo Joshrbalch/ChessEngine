@@ -25,6 +25,7 @@ if __name__ == "__main__":
 
     while not board.is_game_over():
         if board.turn == chess.WHITE and user_side == "w":
+            print("Score: ", engine.getScore())
             move = input("Enter a move: ")
 
             if move == "exit":
@@ -38,6 +39,7 @@ if __name__ == "__main__":
             window.setBoard(board)
             
         elif board.turn == chess.BLACK and user_side == "b":
+                print("Score: ", engine.getScore() * -1)
                 move = input("Enter a move: ")
 
                 if move == "exit":
@@ -51,5 +53,5 @@ if __name__ == "__main__":
                 window.setBoard(board)
 
         else:
-            board = engine.randomMove(board)
+            board = engine.computeMove(board)
             window.setBoard(board)
