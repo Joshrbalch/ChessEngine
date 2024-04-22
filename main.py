@@ -10,15 +10,15 @@ if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()
 
-    board = chess.Board()
-    engine = Engine(board)
-
     print("Enter 'exit' to quit")
 
     user_side = input("White or black? (w/b): ")
 
     if user_side == "b":
         window.setFlipFlag(1)
+
+    board = chess.Board()
+    engine = Engine(board, chess.WHITE)
 
     window.renderBoard()
     window.show()
@@ -53,5 +53,6 @@ if __name__ == "__main__":
                 window.setBoard(board)
 
         else:
-            board = engine.computeMove(board)
+            move = engine.computeMove(board)
+            board.push(move)
             window.setBoard(board)

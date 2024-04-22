@@ -20,11 +20,9 @@ class CandidateMove:
 class BoardTree:
     root = None
 
-
     def __init__(self, board):
         self.board = board
         self.children = []
-
         self.root = CandidateMove(None, 0)  # Initialize root with None move
     
     def evaluate_material(self, board):
@@ -68,16 +66,61 @@ class BoardTree:
             return value
         return -value
     
+    def evaluate_king_safety(self, board):
+        king_position = board.king(board.turn)
+        enemy_attackers = board.attackers(not board.turn, king_position)
+
+        # If the king is under attack, penalize the position
+        if enemy_attackers:
+            return -100
+
+        # Otherwise, reward positions where the king has castle options
+        if board.has_kingside_castling_rights(board.turn) or board.has_queenside_castling_rights(board.turn):
+            return 50
+
+        return 0
+
+    def evaluate_piece_activity(self, board):
+        activity_score = 0
+
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece is not None:
+                # Reward pieces that have more available moves
+                mobility_score = len(list(board.attacks(square)))
+                activity_score += mobility_score
+
+        return activity_score
+    
+    def reward_capture(self, board, move):
+        # Make the move on a copy of the board
+        new_board = board.copy()
+        new_board.pop()
+
+        if new_board.is_capture(move):
+            return 150
+        
+        # Ensure the move is legal before pushing it
+
+        # No capture or illegal move, return 0
+        return 0
+
     def calculate_score(self, board):
-        value = self.evaluate_material(board)
+        material_score = self.evaluate_material(board)
+        king_safety_score = self.evaluate_king_safety(board)
+        piece_activity_score = self.evaluate_piece_activity(board)
+        capture_score = self.reward_capture(board, board.peek())
+
+        total_score = material_score + king_safety_score + piece_activity_score + capture_score
+
         if board.is_checkmate():
             if board.turn == chess.WHITE:
                 return -9999
             return 9999
         if board.is_stalemate():
             return 0
-        # print("Score: ", value)
-        return value
+        
+        return total_score, material_score, king_safety_score, piece_activity_score, capture_score
     
     def get_best_move(self, depth):
         self.populate_root_children(depth)
@@ -86,6 +129,7 @@ class BoardTree:
         print("Legal Moves: ", self.board.legal_moves)
 
         for child in self.root.children:
+            print("Move: ", child.move, " Score: ", child.score)
             if child.score > best_move.score:
                 best_move = child
 
@@ -93,6 +137,7 @@ class BoardTree:
             best_move = random.choice(self.root.children)
 
         print("Best move: ", best_move.move, " Score: ", best_move.score)
+        self.root.children = []  # Clear children list for next move
         return best_move.move
 
     def populate_tree(self, depth, board, node):
@@ -117,9 +162,14 @@ class BoardTree:
 class Engine:
     tree = BoardTree(chess.Board())
     
-    def __init__(self, board):
+    def __init__(self, board, side):
         self.board = board
         self.chessboardSvg = chess.svg.board(self.board).encode("UTF-8")
+
+        if side == 1:
+            self.side = "b"
+        else:
+            self.side = "w"
 
     def getScore(self):
         return self.tree.evaluate_material(self.board)
@@ -135,10 +185,20 @@ class Engine:
         return board
     
     def computeMove(self, board):
-        self.tree.populate_root_children(3)  # Update to populate the root node's children
+        # Make a copy of the current board
+        new_board = self.board.copy()
+
+        # Populate the tree based on the copied board
+        self.tree = BoardTree(new_board)
+        self.tree.populate_root_children(3)
+
+        # Get the best move from the tree
         best_move = self.tree.get_best_move(3)
-        board.push(best_move)
-        return board
+
+        # Ensure the best move is for the side the engine controls
+        new_board.push(best_move)
+
+        return best_move
 
     def get_board(self):
         return self.board
