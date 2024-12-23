@@ -21,6 +21,7 @@ This project is a custom chess engine built using the python-chess library. The 
 ### Prerequisites
 
 Python 3.7+
+
 Install the python-chess library:
 
     pip install python-chess
